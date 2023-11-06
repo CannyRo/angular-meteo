@@ -11,7 +11,7 @@ export class City {
         public language: string,
         public resultType: string,
         public localityType: string,
-        public adress: Adress,
+        public address: Address,
         public highlights?: Highlights,
         public position?: Position,
         public mapView?: MapView,
@@ -20,15 +20,17 @@ export class City {
     
 }
 
-interface Adress {
-    label: string;
-    countryCode: string;
-    countryName: string;
-    stateCode: string;
-    state: string;
-    county: string;
-    city: string;
-    postalCode: string;
+export class Address {
+    constructor(
+    public label: string,
+    public countryCode: string,
+    public countryName: string,
+    public stateCode: string,
+    public state: string,
+    public county: string,
+    public city: string,
+    public postalCode: string,
+    ){}
 }
 
 interface Foo {
@@ -36,19 +38,21 @@ interface Foo {
     end: number;
 }
 
-interface AdressHighlights {
+interface AddressHighlights {
     label: Foo[];
     city: Foo[];
 }
 
 interface Highlights {
     title: Foo[];
-    adress: AdressHighlights
+    adress: AddressHighlights
 }
 
-interface Position {
-    lat: number;
-    lng: number;
+export class Position {
+    constructor(
+    public lat: number,
+    public lng: number,
+    ){}
 }
 
 interface MapView {
