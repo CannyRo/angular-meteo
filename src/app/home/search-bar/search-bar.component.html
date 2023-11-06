@@ -7,4 +7,9 @@
         </datalist>
         <input type="button" value="Search" (click)="searchWeather()"/>
     </form>
+    <div *ngIf="weather && yourCity">
+        <h2>{{yourCity.city}}</h2>
+        <p>{{weather.current.temperature_2m}} {{weather.current_units.temperature_2m}}</p>
+        <p>{{weather.current.apparent_temperature}} {{weather.current_units.apparent_temperature}}</p>
+    </div>
 </section>

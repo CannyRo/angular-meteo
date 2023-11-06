@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, Subject, debounceTime, distinctUntilChanged, map, toArray, switchMap, shareReplay } from 'rxjs';
+import { Observable, Subject, debounceTime, distinctUntilChanged, map, toArray, switchMap, shareReplay, Subscription } from 'rxjs';
 import { SearchService } from 'src/app/services/search.service';
 import { Address, City, CityList, Position } from 'src/app/city';
+import { Weather } from 'src/app/weather';
 
 @Component({
   selector: 'app-search-bar',
@@ -11,7 +12,7 @@ import { Address, City, CityList, Position } from 'src/app/city';
   templateUrl: './search-bar.component.html',
   styleUrls: ['./search-bar.component.css']
 })
-export class SearchBarComponent implements OnInit{
+export class SearchBarComponent implements OnInit, OnDestroy{
 
   private searchTerms = new Subject<string>();
   city$!: Observable<CityList>
@@ -20,10 +21,16 @@ export class SearchBarComponent implements OnInit{
   yourCityRaw$!:Observable<CityList>
   yourCity$!:Observable<City>
 
-  private coordinate$ = new Subject<Position>();
+  weather$!:Observable<Weather>
+
+  fooSub!: Subscription;
+  citySub!: Subscription;
+  weatherSub!:Subscription;
+
 
   yourCity!:Address;
   cityPosition!:Position|undefined;
+  weather!:Weather|undefined;
 
   constructor(
     private searchService: SearchService
@@ -47,26 +54,32 @@ export class SearchBarComponent implements OnInit{
   }
 
   searchWeather(){
-    const LastLocation = this.foo$.subscribe(city => this.yourCity=city[0].address);
+    this.fooSub = this.foo$.subscribe(city => this.yourCity=city[0].address);
     console.log(this.yourCity);
-    // const LastLocation = this.foo$.subscribe(city => console.log(city[0].address))
     this.getLocation(this.yourCity);
   }
 
   getLocation(location:Address){
     console.log("Get location");
     this.yourCityRaw$ = this.searchService.getCityLocation(location);
-    this.yourCityRaw$.subscribe( response => this.cityPosition = response.items[0].position);
-    // this.yourCityRaw$.subscribe( response => console.log(response.items[0].position));
-    // this.yourCityRaw$.subscribe( city => this.cityPosition = city.items[0].position);
-    // return information
-    console.log(this.cityPosition)
+    this.citySub = this.yourCityRaw$.subscribe( response => this.cityPosition = response.items[0].position);
+    console.log(this.cityPosition);
+    this.getWeather(this.cityPosition);
   }
 
-  getWeather(position:Position){
+  getWeather(position:Position|undefined){
     console.log("GET Weather");
-    
+    if(position){
+      console.log('IF is OK')
+      this.weather$ = this.searchService.getWeatherDetail(position);
+      this.weatherSub = this.weather$.subscribe( response => this.weather = response);
+    }
   }
 
+  ngOnDestroy(){
+    this.fooSub.unsubscribe();
+    this.citySub.unsubscribe();
+    this.weatherSub.unsubscribe();
 
+  }
 }
