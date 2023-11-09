@@ -19,6 +19,7 @@ interface CurrentUnits {
     time: string;
     interval: string;
     temperature_2m: string;
+    apparent_temperature: string;
     relativehumidity_2m: string;
     is_day: string;
     precipitation: string;
@@ -32,6 +33,7 @@ interface Current {
     time: string;
     interval: number;
     temperature_2m: number;
+    apparent_temperature: number;
     relativehumidity_2m: number;
     is_day: number;
     precipitation: number;

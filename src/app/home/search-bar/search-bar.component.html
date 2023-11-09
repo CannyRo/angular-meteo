@@ -2,15 +2,14 @@
     <form>
         <input type="text" id="search" name="search" autocomplete="off" placeholder="Search a city" 
         #searchBox (input)="search(searchBox.value)" list="datalistOptions"/>
-        <input type="button" value="Search"/>
         <datalist id="datalistOptions" >
-            <option *ngFor="let city of foo$ | async " [value]="city.title">
-        </datalist> 
-        <!--<datalist id="datalistOptions" *ngFor="let items of city$ | async ">
-            <option *ngFor="let city of items.items" [value]="city.title">
-        </datalist> -->
-        <div *ngIf="city$">
-            <p>{{city$}}</p>
-        </div>
+            <option *ngFor="let city of foo$ | async " [value]="city.title" >
+        </datalist>
+        <input type="button" value="Search" (click)="searchWeather()"/>
     </form>
+    <div *ngIf="weather && yourCity">
+        <h2>{{yourCity.city}}</h2>
+        <p>{{weather.current.temperature_2m}} {{weather.current_units.temperature_2m}}</p>
+        <p>{{weather.current.apparent_temperature}} {{weather.current_units.apparent_temperature}}</p>
+    </div>
 </section>
