@@ -1,4 +1,23 @@
-<p>home</p>
-<app-search-bar></app-search-bar>
-<app-overview></app-overview>
+
+<app-search-bar
+    [searchTerm]="(searchTerm$ | async)"
+    [cities]="(cities$ | async)"
+    [citySelected]="(city$ | async)"
+    (handleTerm)="handleSearch($event)"
+    (getWeatherData)="getWeatherData($event)"
+></app-search-bar>
+<!--
+<app-search-bar
+    [searchTerm]="(searchTerm$ | async)"
+    [cities]="(cities$ | async)"
+    [citySelected]="(city$ | async)"
+    (handleTerm)="handleSearch($event)"
+    (selectCity)="selectCity($event)"
+    (getWeatherData)="getWeatherData($event)"
+></app-search-bar>
+-->
+<app-overview
+    [city]="(city$ | async)"
+    [weather]="(weather$ | async)"
+></app-overview>
 <app-favorite></app-favorite>
