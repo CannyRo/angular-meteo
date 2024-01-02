@@ -1,85 +1,99 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, Subject, debounceTime, distinctUntilChanged, map, toArray, switchMap, shareReplay, Subscription } from 'rxjs';
+import { Observable, Subject, debounceTime, distinctUntilChanged, map, toArray, switchMap, shareReplay, Subscription, of, tap } from 'rxjs';
 import { SearchService } from 'src/app/services/search.service';
 import { Address, City, CityList, Position } from 'src/app/city';
 import { Weather } from 'src/app/weather';
+import { Coordinates, LocationData } from 'src/app/location';
+import { FacadeService } from 'src/app/services/facade.service';
+import { CityObjectToStringPipe } from "../../services/city-object-to-string.pipe";
 
 @Component({
-  selector: 'app-search-bar',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './search-bar.component.html',
-  styleUrls: ['./search-bar.component.css']
+    selector: 'app-search-bar',
+    standalone: true,
+    templateUrl: './search-bar.component.html',
+    styleUrls: ['./search-bar.component.css'],
+    imports: [CommonModule, CityObjectToStringPipe]
 })
-export class SearchBarComponent implements OnInit, OnDestroy{
+export class SearchBarComponent implements OnInit, OnChanges{
 
-  private searchTerms = new Subject<string>();
-  city$!: Observable<CityList>
-  foo$!:Observable<City[]>
+  @Input() searchTerm!: string | null;
 
-  yourCityRaw$!:Observable<CityList>
-  yourCity$!:Observable<City>
+  @Input() cities!: LocationData[] | null;
 
-  weather$!:Observable<Weather>
+  @Input() citySelected!: LocationData | null;
 
-  fooSub!: Subscription;
-  citySub!: Subscription;
-  weatherSub!:Subscription;
+  @Output() handleTerm = new EventEmitter<string>();
 
+  // @Output() selectCity = new EventEmitter<Address>();
 
-  yourCity!:Address;
+  @Output() getWeatherData = new EventEmitter<Coordinates>();
+
+  // ###
   cityPosition!:Position|undefined;
+  // ###
   weather!:Weather|undefined;
 
-  constructor(
-    private searchService: SearchService
-  ){}
 
   ngOnInit(): void {
-    this.city$ = this.searchTerms.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap((term: string) => this.searchService.searchCities(term)),
-    );
-    this.foo$ = this.city$.pipe(
-      map( response => response.items),
-      shareReplay(1)
-    );
-    console.log(typeof(this.foo$));
+    // console.log("ngOnInit from Searchbar Component");
   }
 
-  search(term:string): void {
-    this.searchTerms.next(term);
+  ngOnChanges() : void {
+    console.log("ngOnChanges SEARCHBAR");
+
+    console.log(this.searchTerm);
+    // if(this.cities && this.cities.length == 1){
+    //   console.log("On veut chercher le détail de cette ville : ");
+    //   let locationLocal = this.cities[0].address;
+    //   console.log(locationLocal);
+    //   this.getLocation(locationLocal);
+    // }
+    // if(this.citySelected){
+    //   console.log("Positions : ",this.citySelected.position)
+    //   this.cityPosition = this.citySelected.position
+    // }
   }
 
-  searchWeather(){
-    this.fooSub = this.foo$.subscribe(city => this.yourCity=city[0].address);
-    console.log(this.yourCity);
-    this.getLocation(this.yourCity);
+  handleChange(term:string): void {
+    this.handleTerm.emit(term);
   }
 
-  getLocation(location:Address){
-    console.log("Get location");
-    this.yourCityRaw$ = this.searchService.getCityLocation(location);
-    this.citySub = this.yourCityRaw$.subscribe( response => this.cityPosition = response.items[0].position);
-    console.log(this.cityPosition);
-    this.getWeather(this.cityPosition);
-  }
-
-  getWeather(position:Position|undefined){
-    console.log("GET Weather");
-    if(position){
-      console.log('IF is OK')
-      this.weather$ = this.searchService.getWeatherDetail(position);
-      this.weatherSub = this.weather$.subscribe( response => this.weather = response);
+  getWeatherbis(latitude: number, longitude: number){
+    const coordinatesRequiered : Coordinates = {
+      latitude: latitude,
+      longitude: longitude
+    } 
+    console.log(`GET Weather from : lat ${latitude} and long ${longitude}`);
+    if(!latitude && !longitude){
+      console.log("Position unknown... search a city");
+      return;
     }
+    this.getWeatherData.emit(coordinatesRequiered);
   }
 
-  ngOnDestroy(){
-    this.fooSub.unsubscribe();
-    this.citySub.unsubscribe();
-    this.weatherSub.unsubscribe();
-
+  getWeather(term :string){
+    if(!term.includes("latitude") && !term.includes("longitude")){
+      console.log("Localisation unknown");
+      return
+    }
+    console.log("CLICK");
+    console.log(this.cities);
   }
+
+  // getLocation(location:Address){
+  //   console.log("GetLocation from SEARCHBAR");
+  //   this.selectCity.emit(location);
+  // }
+
+  // getWeather(position:Position|undefined){
+  //   console.log("GET Weather from : ",position);
+  //   if(position){
+  //     console.log('IF is OK');
+  //     this.getWeatherData.emit(position);
+  //   } else {
+  //     console.log("Position unknown!!")
+  //   }
+  // }
+
 }
